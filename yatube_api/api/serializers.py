@@ -64,9 +64,11 @@ class FollowSerializer(serializers.ModelSerializer):
                 'following': 'Нельзя оформить подписку на самого себя.'
             })
 
-        if Follow.objects.filter(user=request_user, following=target_user).exists():
+        if Follow.objects.filter(user=request_user,
+                                 following=target_user).exists():
             raise serializers.ValidationError({
-                'following': 'Вы уже оформили подписку на этого пользователя.'
+                'following':
+                'Вы уже оформили подписку на этого пользователя.'
             })
 
         return data
