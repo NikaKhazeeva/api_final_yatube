@@ -2,7 +2,6 @@ from rest_framework import serializers
 from posts.models import Comment, Post, Follow, Group
 from django.contrib.auth import get_user_model
 
-
 User = get_user_model()
 
 
@@ -38,20 +37,36 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username'
+    )
+    following = serializers.SlugRelatedField(
+        queryset=User.objects.all(),
+        slug_field='username'
+    )
+
     class Meta:
         model = Follow
         fields = ('user', 'following')
-        validators = [
-            serializers.UniqueTogetherValidator(
-                queryset=Follow.objects.all(),
-                fields=('user', 'following'),
-                message='Вы уже оформили подписку на этого пользователя'
-            )
-        ]
 
-    def validate_following(self, value):
-        request = self.context.get('request')
-        if request and value == request.user:
-            raise serializers.ValidationError(
-                'Нельзя оформить подписку на самого себя!')
-        return value
+    def validate(self, data):
+        request_user = self.context['request'].user
+        target_user = data.get('following')
+
+        if not target_user:
+            raise serializers.ValidationError({
+                'following': 'Поле обязательно для заполнения.'
+            })
+
+        if request_user == target_user:
+            raise serializers.ValidationError({
+                'following': 'Нельзя оформить подписку на самого себя.'
+            })
+
+        if Follow.objects.filter(user=request_user, following=target_user).exists():
+            raise serializers.ValidationError({
+                'following': 'Вы уже оформили подписку на этого пользователя.'
+            })
+
+        return data

@@ -1,12 +1,15 @@
+# TODO:  Напишите свой вариант
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, permissions, filters, mixins
-from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
-
-from posts.models import Post, Group, Comment, Follow
-from .serializers import (PostSerializer, GroupSerializer,
-                          CommentSerializer, FollowSerializer)
+from posts.models import Follow
+from .serializers import FollowSerializer
+from posts.models import Post
+from .serializers import PostSerializer
 from .permissions import IsAuthorOrReadOnly
+from posts.models import Group, Comment
+from api.serializers import GroupSerializer, CommentSerializer
+from rest_framework.pagination import LimitOffsetPagination
 
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
